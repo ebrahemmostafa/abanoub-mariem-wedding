@@ -104,7 +104,7 @@ canvas#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-even
 
 <div class="inv-card reveal"><span class="eyebrow">The Evening</span><h2 style="font-size:1.4rem"><em>Timeline</em></h2><div class="tl-item"><span class="tl-time">7:00 PM</span><span class="tl-dot"></span><div class="tl-info"><h4>Wedding ceremony</h4><p>San Mark Church</p></div></div><div class="tl-item"><span class="tl-time">8:00 PM</span><span class="tl-dot"></span><div class="tl-info"><h4>Grand Festival</h4></div></div><div class="tl-item"><span class="tl-time">8:30 PM</span><span class="tl-dot"></span><div class="tl-info"><h4>First dance</h4></div></div><div class="tl-item"><span class="tl-time">9:00 PM</span><span class="tl-dot"></span><div class="tl-info"><h4>Enjoy the Celebration</h4></div></div></div>
 <div class="inv-card reveal"><span class="eyebrow">Dress Code</span><h2 style="font-size:1.4rem">Formal <em>Attire</em></h2><div class="divider"></div><img class="story-img" src="images/formal_attire.png" alt="Formal Attire" loading="lazy" decoding="async" style="margin-bottom: 1.5rem;"><p style="margin-bottom: 1rem;">We kindly ask you to dress formally to join us on this special day.</p><p style="margin-bottom: 1rem;">Please avoid wearing white &mdash; it is reserved for the bride.</p><p style="margin-bottom: 1.5rem;">Ladies, we'd love to see you in bright, summery colors to celebrate our special day 🌺☀️.</p><p style="color: #e57373; font-weight: 500; font-size: 0.9rem; letter-spacing: 0.05em; text-transform: uppercase;">No kids allowed</p></div>
-<div class="inv-card reveal"><span class="eyebrow">Be With Us</span><h2 style="font-size:1.4rem">Kindly <em>Reply</em></h2><form class="rsvp-form" id="rsvpForm"><input type="text" placeholder="Your Full Name" required><select><option value="">Will you attend?</option><option>Joyfully Accept</option><option>Respectfully Decline</option></select><textarea placeholder="A message for the couple"></textarea><button type="submit">Send Reply</button></form><p class="thank-you" id="thankYou">Thank you!<br>The stage is set for your arrival.</p></div>
+<div class="inv-card reveal"><span class="eyebrow">Be With Us</span><h2 style="font-size:1.4rem">Kindly <em>Reply</em></h2><form class="rsvp-form" id="rsvpForm"><input type="text" id="rsvpName" placeholder="Your Full Name" required><select id="rsvpStatus" required><option value="">Will you attend?</option><option value="Joyfully Accept">Joyfully Accept</option><option value="Respectfully Decline">Respectfully Decline</option></select><textarea id="rsvpMessage" placeholder="A message for the couple"></textarea><button type="submit" id="rsvpBtn">Send Reply</button></form><p class="thank-you" id="thankYou">Thank you!<br>The stage is set for your arrival.</p></div>
 <div class="inv-card footer-card reveal"><span class="ornament" style="color:var(--gold)">*</span><h2 style="font-size:1.6rem">The curtain rises on<br><em>our forever.</em></h2><div class="divider"></div><p class="sub" style="color:var(--cream); font-size: 1.3rem;">Abanoub &amp; Mariam</p><p style="margin-top:2rem;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase">July 26th - Beni-Suef - 2026</p><p style="margin-top:2rem;font-size:.7rem;font-family:'Poppins',sans-serif;">Made with love by <a href="https://ajwa2-collection.vercel.app/" target="_blank" style="color:var(--gold);text-decoration:none;">Ajwaa</a></p></div>
 <div style="height:5rem"></div>
 </div>
@@ -145,7 +145,36 @@ reveals.forEach(r=>obs.observe(r));
 const wedding=new Date('2026-07-26T19:00:00');
 function updateCD(){const now=new Date(),diff=wedding-now;if(diff<=0)return;document.getElementById('cd-days').textContent=String(Math.floor(diff/864e5)).padStart(3,'0');document.getElementById('cd-hours').textContent=String(Math.floor(diff%864e5/36e5)).padStart(2,'0');document.getElementById('cd-mins').textContent=String(Math.floor(diff%36e5/6e4)).padStart(2,'0');document.getElementById('cd-secs').textContent=String(Math.floor(diff%6e4/1e3)).padStart(2,'0')}
 updateCD();setInterval(updateCD,1000);
-document.getElementById('rsvpForm').addEventListener('submit',e=>{e.preventDefault();e.target.style.display='none';document.getElementById('thankYou').style.display='block'});
+const GOOGLE_SCRIPT_URL = "";
+document.getElementById('rsvpForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('rsvpBtn');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    const data = {
+        name: document.getElementById('rsvpName').value,
+        status: document.getElementById('rsvpStatus').value,
+        message: document.getElementById('rsvpMessage').value,
+        timestamp: new Date().toLocaleString()
+    };
+
+    if (GOOGLE_SCRIPT_URL) {
+        const formData = new URLSearchParams();
+        for (const key in data) formData.append(key, data[key]);
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: formData, mode: 'no-cors' });
+        } catch(err) { console.error(err); }
+    } else {
+        let stored = localStorage.getItem('wedding_rsvps');
+        let rsvps = stored ? JSON.parse(stored) : [];
+        rsvps.push(data);
+        localStorage.setItem('wedding_rsvps', JSON.stringify(rsvps));
+    }
+    
+    e.target.style.display = 'none';
+    document.getElementById('thankYou').style.display = 'block';
+});
 musicBtn.addEventListener('click',()=>{
     playing=!playing;
     musicBtn.classList.toggle('playing',playing);

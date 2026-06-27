@@ -1,0 +1,64 @@
+// Google Apps Script to save RSVPs to a Google Sheet
+// Instructions:
+// 1. Create a new Google Sheet
+// 2. Add these column headers in row 1: Timestamp, Name, Status, Message
+// 3. Go to Extensions > Apps Script
+// 4. Paste this entire code into Code.gs (replacing everything there)
+// 5. Click Deploy > New Deployment
+// 6. Select type: Web App
+// 7. Execute as: Me
+// 8. Who has access: Anyone
+// 9. Click Deploy, authorize the app, and copy the Web App URL.
+// 10. Paste that URL into replies.html and index.html where GOOGLE_SCRIPT_URL is defined.
+
+function doPost(e) {
+  return handleRequest(e);
+}
+
+function doGet(e) {
+  return handleRequest(e);
+}
+
+function handleRequest(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  
+  if (e.parameter.action === 'read') {
+    // Return all data
+    var data = sheet.getDataRange().getValues();
+    var result = [];
+    
+    // Skip header row
+    for (var i = 1; i < data.length; i++) {
+      var rowObject = {};
+      for (var j = 0; j < headers.length; j++) {
+        var header = headers[j].toLowerCase();
+        rowObject[header] = data[i][j];
+      }
+      result.push(rowObject);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify(result))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  // Otherwise, write data
+  var newRow = [];
+  var timestamp = new Date().toLocaleString();
+  
+  for (var j = 0; j < headers.length; j++) {
+    var header = headers[j].toLowerCase();
+    if (header === 'timestamp') {
+      newRow.push(timestamp);
+    } else if (e.parameter[header] !== undefined) {
+      newRow.push(e.parameter[header]);
+    } else {
+      newRow.push('');
+    }
+  }
+  
+  sheet.appendRow(newRow);
+  
+  return ContentService.createTextOutput(JSON.stringify({"result": "success"}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
