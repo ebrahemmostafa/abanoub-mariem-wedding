@@ -145,7 +145,7 @@ reveals.forEach(r=>obs.observe(r));
 const wedding=new Date('2026-07-26T19:00:00');
 function updateCD(){const now=new Date(),diff=wedding-now;if(diff<=0)return;document.getElementById('cd-days').textContent=String(Math.floor(diff/864e5)).padStart(3,'0');document.getElementById('cd-hours').textContent=String(Math.floor(diff%864e5/36e5)).padStart(2,'0');document.getElementById('cd-mins').textContent=String(Math.floor(diff%36e5/6e4)).padStart(2,'0');document.getElementById('cd-secs').textContent=String(Math.floor(diff%6e4/1e3)).padStart(2,'0')}
 updateCD();setInterval(updateCD,1000);
-const GOOGLE_SCRIPT_URL = "";
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzarzX32w8rdurY-zDYxCpqjTisNuj7UWbb6i-fMRv-zoRww6wkBxVbq68vvfQ7TK7vLw/exec";
 document.getElementById('rsvpForm').addEventListener('submit', async e => {
     e.preventDefault();
     const btn = document.getElementById('rsvpBtn');
