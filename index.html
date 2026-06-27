@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -88,12 +88,9 @@ canvas#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-even
 </head>
 <body>
 <div class="envelope-wrapper" id="envelopeWrapper">
-<div class="envelope" id="envelope">
-<div class="flap"></div>
-<div class="card-peek"><div class="inner"><p class="small">The grand celebration of</p><h3>Laila <em>&amp;</em> Sherif</h3></div></div>
-<div class="body-env"></div>
-<div class="seal"><img src="images/seal.jpg" alt="Wax seal" decoding="async"></div>
-<span class="tap">Tap to open</span>
+<div class="envelope" id="envelope" style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center;">
+<video id="envelopeVideo" src="images/envelope_video.mp4" playsinline style="width: 100vw; height: 100vh; object-fit: contain; cursor: pointer;"></video>
+<span class="tap" id="tapText" style="position: absolute; bottom: 8%; font-size: 0.7rem;">Tap to open</span>
 </div>
 </div>
 <canvas id="particles"></canvas>
@@ -111,8 +108,30 @@ canvas#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-even
 </div>
 <div class="music-btn" id="musicBtn"><div class="bars"><span style="height:3px"></span><span style="height:7px"></span><span style="height:5px"></span></div>Music</div>
 <script>
-const env=document.getElementById('envelope'),wrapper=document.getElementById('envelopeWrapper'),main=document.getElementById('mainContent');
-env.addEventListener('click',()=>{env.classList.add('open');setTimeout(()=>{wrapper.classList.add('opened');main.classList.add('show');document.body.style.overflow='auto'},1200)});
+const env=document.getElementById('envelope'),wrapper=document.getElementById('envelopeWrapper'),main=document.getElementById('mainContent'),vid=document.getElementById('envelopeVideo'),tapText=document.getElementById('tapText');
+
+vid.addEventListener('loadeddata', () => {
+    const c = document.createElement('canvas');
+    c.width = 1; c.height = 1;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(vid, 0, 0, 1, 1);
+    try {
+        const p = ctx.getImageData(0, 0, 1, 1).data;
+        wrapper.style.background = `rgb(${p[0]}, ${p[1]}, ${p[2]})`;
+    } catch(e) {}
+});
+
+env.addEventListener('click',()=>{
+    if(vid.paused) {
+        vid.play();
+        if(tapText) tapText.style.display='none';
+    }
+});
+vid.addEventListener('ended',()=>{
+    wrapper.classList.add('opened');
+    main.classList.add('show');
+    document.body.style.overflow='auto';
+});
 document.body.style.overflow='hidden';
 const canvas=document.getElementById('particles'),ctx=canvas.getContext('2d');let W,H,sparks=[];
 function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
