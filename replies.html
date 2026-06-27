@@ -172,7 +172,7 @@ async function fetchReplies() {
     if (GOOGLE_SCRIPT_URL) {
         try {
             document.getElementById('setupNotice').style.display = 'none';
-            const response = await fetch(GOOGLE_SCRIPT_URL);
+            const response = await fetch(GOOGLE_SCRIPT_URL + "?action=read");
             data = await response.json();
         } catch (e) {
             console.error("Failed to fetch from Google Sheets:", e);
