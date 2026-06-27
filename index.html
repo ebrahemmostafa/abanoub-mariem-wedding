@@ -107,13 +107,22 @@ canvas#particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-even
 <div style="height:5rem"></div>
 </div>
 <div class="music-btn" id="musicBtn"><div class="bars"><span style="height:3px"></span><span style="height:7px"></span><span style="height:5px"></span></div>Music</div>
+<audio id="bgMusic" src="music.mp3" loop preload="auto"></audio>
 <script>
 const env=document.getElementById('envelope'),wrapper=document.getElementById('envelopeWrapper'),main=document.getElementById('mainContent'),vid=document.getElementById('envelopeVideo'),bgVid=document.getElementById('envelopeBg'),tapText=document.getElementById('tapText');
+const bgMusic=document.getElementById('bgMusic');
+const musicBtn=document.getElementById('musicBtn');
+let playing=false;
 
 env.addEventListener('click',()=>{
     if(vid.paused) {
         vid.play();
         if(bgVid) bgVid.play();
+        if(bgMusic && !playing) {
+            bgMusic.play().catch(e=>console.log("Audio play blocked by browser:", e));
+            playing=true;
+            musicBtn.classList.add('playing');
+        }
         if(tapText) tapText.style.display='none';
     }
 });
@@ -139,8 +148,11 @@ const wedding=new Date('2026-07-26T19:00:00');
 function updateCD(){const now=new Date(),diff=wedding-now;if(diff<=0)return;document.getElementById('cd-days').textContent=String(Math.floor(diff/864e5)).padStart(3,'0');document.getElementById('cd-hours').textContent=String(Math.floor(diff%864e5/36e5)).padStart(2,'0');document.getElementById('cd-mins').textContent=String(Math.floor(diff%36e5/6e4)).padStart(2,'0');document.getElementById('cd-secs').textContent=String(Math.floor(diff%6e4/1e3)).padStart(2,'0')}
 updateCD();setInterval(updateCD,1000);
 document.getElementById('rsvpForm').addEventListener('submit',e=>{e.preventDefault();e.target.style.display='none';document.getElementById('thankYou').style.display='block'});
-const musicBtn=document.getElementById('musicBtn');let playing=false;
-musicBtn.addEventListener('click',()=>{playing=!playing;musicBtn.classList.toggle('playing',playing)});
+musicBtn.addEventListener('click',()=>{
+    playing=!playing;
+    musicBtn.classList.toggle('playing',playing);
+    if(playing) bgMusic.play(); else bgMusic.pause();
+});
 </script>
 <script src="../invitation-language-switch.js"></script>
 </body>
